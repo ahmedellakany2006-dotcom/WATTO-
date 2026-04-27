@@ -1,0 +1,2366 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WATTO - Smart Energy Management</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <canvas id="canvasNetwork"></canvas>
+
+    <div class="global-controls" id="globalControls">
+      <button
+        type="button"
+        onclick="toggleLang()"
+        title="تغيير اللغة / Change Language"
+      >
+        <span class="lang-toggle-text" data-i18n="lang_btn">EN</span>
+      </button>
+      <button
+        type="button"
+        onclick="toggleTheme()"
+        title="الوضع الليلي / Dark Mode"
+      >
+        <i class="fas fa-moon theme-icon"></i>
+      </button>
+    </div>
+
+    <div id="splashScreen" class="screen active" style="position: relative; overflow: hidden;">
+      <i class="fas fa-fan splash-icon-fan" style="position: absolute; top: 20%; left: 15%; font-size: 6rem; color: rgba(0, 245, 212, 0.3);"></i>
+      <i class="fas fa-fan splash-icon-fan" style="position: absolute; bottom: 20%; right: 15%; font-size: 8rem; color: rgba(0, 187, 249, 0.2);"></i>
+      <i class="fas fa-lightbulb splash-icon-bulb" style="position: absolute; top: 25%; right: 20%; font-size: 5rem; color: rgba(254, 228, 64, 0.4);"></i>
+      <i class="fas fa-lightbulb splash-icon-bulb" style="position: absolute; bottom: 30%; left: 20%; font-size: 4rem; color: rgba(254, 228, 64, 0.3);"></i>
+      
+      <div class="watto-logo-splash" style="position: relative; z-index: 10;">WATTO</div>
+      <p
+        style="
+          color: var(--text-muted);
+          margin-top: 30px;
+          font-size: 1.5rem;
+          font-weight: 600;
+          letter-spacing: 2px;
+          position: relative;
+          z-index: 10;
+        "
+      >
+        Smart Energy Management
+      </p>
+    </div>
+
+    <div id="loginScreen" class="screen">
+      <div class="glass-card" style="width: 100%; max-width: 500px">
+        <div
+          style="
+            display: flex;
+            background: var(--bg-color);
+            border-radius: 15px;
+            padding: 6px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+          "
+        >
+          <button
+            type="button"
+            id="tabUser"
+            style="
+              flex: 1;
+              padding: 12px;
+              border-radius: 12px;
+              border: none;
+              background: var(--primary);
+              color: white;
+              font-weight: 800;
+              font-size: 1.1rem;
+              cursor: pointer;
+              box-shadow: var(--glow);
+            "
+            onclick="switchLoginTab('user')"
+          >
+            مستخدم
+          </button>
+          <button
+            type="button"
+            id="tabAdmin"
+            style="
+              flex: 1;
+              padding: 12px;
+              border-radius: 12px;
+              border: none;
+              background: transparent;
+              color: var(--text-muted);
+              font-weight: 800;
+              font-size: 1.1rem;
+              cursor: pointer;
+            "
+            onclick="switchLoginTab('admin')"
+          >
+            مدير النظام
+          </button>
+        </div>
+        <h2 class="text-center mb-40" id="loginTitle" data-i18n="login_title">
+          تسجيل دخول المستخدم
+        </h2>
+        <form onsubmit="handleLogin(event)">
+          <div class="input-group">
+            <label id="loginIdLabel" data-i18n="login_id_label"
+              >الرقم القومي (14 رقم)</label
+            >
+            <input
+              type="text"
+              id="loginId"
+              data-i18n-ph="login_id_ph"
+              placeholder="أدخل الرقم القومي"
+              required
+            />
+            <i class="fas fa-id-card" id="loginIdIcon"></i>
+          </div>
+          <div class="input-group">
+            <label data-i18n="password_label">كلمة المرور</label>
+            <input
+              type="password"
+              id="loginPass"
+              data-i18n-ph="password"
+              placeholder="••••••••"
+              required
+            />
+            <i class="fas fa-lock"></i>
+          </div>
+          <button
+            type="submit"
+            class="btn-primary"
+            id="loginBtnStyle"
+            style="margin-top: 20px"
+          >
+            <span data-i18n="login_btn">تسجيل الدخول</span>
+            <i class="fas fa-sign-in-alt"></i>
+          </button>
+        </form>
+        <div
+          id="registerLinkSection"
+          style="margin-top: 30px; text-align: center; font-size: 1.1rem"
+        >
+          <span class="text-muted" data-i18n="no_account">ليس لديك حساب؟</span>
+          <button
+            type="button"
+            class="btn-outline"
+            style="
+              border: none;
+              background: none;
+              font-weight: 900;
+              color: var(--primary);
+              text-decoration: underline;
+              cursor: pointer;
+              padding: 0;
+              margin-right: 10px;
+              box-shadow: none;
+            "
+            onclick="switchScreen('loginScreen', 'registerScreen')"
+          >
+            <span data-i18n="create_account">إنشاء حساب جديد</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="registerScreen" class="screen">
+      <div class="glass-card" style="width: 1000px; max-width: 95vw">
+        <h2 class="text-center mb-40" data-i18n="create_account_title">
+          إنشاء حساب في WATTO
+        </h2>
+        <form onsubmit="handleRegister(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+            <div class="input-group">
+              <label data-i18n="full_name_label">الاسم بالكامل (الرباعي)</label>
+              <input
+                type="text"
+                id="regFullName"
+                data-i18n-ph="full_name"
+                placeholder="الاسم بالكامل"
+                required
+              />
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="input-group">
+              <label data-i18n="login_id_label">الرقم القومي (14 رقم)</label>
+              <input
+                type="text"
+                id="regNationalId"
+                data-i18n-ph="national_id"
+                placeholder="الرقم القومي (14 رقم)"
+                maxlength="14"
+                required
+              />
+              <i class="fas fa-id-card"></i>
+            </div>
+            <div class="input-group">
+              <label data-i18n="password_rules_label"
+                >كلمة المرور (6 أحرف، يجب أن تحتوي على حروف وأرقام)</label
+              >
+              <input
+                type="password"
+                id="regPassword"
+                data-i18n-ph="password"
+                placeholder="كلمة المرور"
+                pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}"
+                title="الرقم السري يجب أن يحتوي على 6 خانات على الأقل، تتضمن حروفاً وأرقاماً"
+                required
+              />
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="input-group">
+              <label data-i18n="confirm_pass_label">تأكيد كلمة المرور</label>
+              <input
+                type="password"
+                id="regConfirmPass"
+                data-i18n-ph="confirm_pass"
+                placeholder="تأكيد كلمة المرور"
+                required
+              />
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="input-group">
+              <label data-i18n="region_label"
+                >المنطقة / الحي (مثال: شبرا، دمنهور)</label
+              >
+              <input
+                type="text"
+                id="regRegion"
+                data-i18n-ph="region"
+                placeholder="المنطقة"
+                required
+              />
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="input-group">
+              <label data-i18n="address_label">العنوان بالتفصيل</label>
+              <input
+                type="text"
+                id="regAddress"
+                data-i18n-ph="address"
+                placeholder="العنوان"
+                required
+              />
+              <i class="fas fa-location-arrow"></i>
+            </div>
+            <div class="input-group">
+              <label data-i18n="area_label">مساحة المكان (متر مربع)</label>
+              <input
+                type="number"
+                id="regArea"
+                data-i18n-ph="area"
+                placeholder="المساحة"
+                min="10"
+                required
+              />
+              <i class="fas fa-ruler-combined"></i>
+            </div>
+            <div class="input-group">
+              <label data-i18n="family_role_label">دورك في الأسرة</label>
+              <select id="regFamilyRole" required>
+                <option value="" disabled selected data-i18n="select_option">
+                  اختر...
+                </option>
+                <option value="father" data-i18n="father">
+                  أب / عائل (عامل)
+                </option>
+                <option value="mother" data-i18n="mother">أم</option>
+                <option value="working" data-i18n="working">فرد عامل</option>
+                <option value="not_working" data-i18n="not_working">
+                  طالب / غير عامل
+                </option>
+              </select>
+              <i class="fas fa-users-cog"></i>
+            </div>
+            <div class="input-group">
+              <label data-i18n="tier_label">الشريحة الحالية للكهرباء</label>
+              <select id="regTier" required>
+                <option value="" disabled selected data-i18n="select_option">
+                  اختر الشريحة...
+                </option>
+                <option value="1" data-i18n="t1">
+                  الشريحة الأولى (0 - 50 كيلو وات)
+                </option>
+                <option value="2" data-i18n="t2">
+                  الشريحة الثانية (51 - 100 كيلو وات)
+                </option>
+                <option value="3" data-i18n="t3">
+                  الشريحة الثالثة (101 - 200 كيلو وات)
+                </option>
+                <option value="4" data-i18n="t4">
+                  الشريحة الرابعة (201 - 350 كيلو وات)
+                </option>
+                <option value="5" data-i18n="t5">
+                  الشريحة الخامسة (351 - 650 كيلو وات)
+                </option>
+                <option value="6" data-i18n="t6">
+                  الشريحة السادسة (651 - 1000 كيلو وات)
+                </option>
+                <option value="7" data-i18n="t7">
+                  الشريحة السابعة (أكثر من 1000 كيلو وات)
+                </option>
+              </select>
+              <i class="fas fa-layer-group"></i>
+            </div>
+          </div>
+
+          <div
+            style="
+              margin-top: 30px;
+              text-align: right;
+              background: var(--bg-color);
+              padding: 30px;
+              border-radius: 20px;
+              border: 1px solid var(--border-color);
+            "
+            id="placeTypeSection"
+          >
+            <label
+              style="
+                display: block;
+                margin-bottom: 20px;
+                font-weight: 800;
+                font-size: 1.15rem;
+              "
+              data-i18n="place_type"
+              >برجاء تحديد نوع المكان:</label
+            >
+            <div class="place-type-container">
+              <div
+                class="place-type-item"
+                onclick="selectPlaceType(this, 'apartment')"
+              >
+                <i class="fas fa-door-closed"></i
+                ><span data-i18n="apartment">شقة</span>
+              </div>
+              <div
+                class="place-type-item"
+                onclick="selectPlaceType(this, 'villa')"
+              >
+                <i class="fas fa-home"></i><span data-i18n="villa">فيلا</span>
+              </div>
+              <div
+                class="place-type-item"
+                onclick="selectPlaceType(this, 'company')"
+              >
+                <i class="fas fa-briefcase"></i
+                ><span data-i18n="company">شركة</span>
+              </div>
+              <div
+                class="place-type-item"
+                onclick="selectPlaceType(this, 'building')"
+              >
+                <i class="fas fa-building"></i
+                ><span data-i18n="building">عمارة</span>
+              </div>
+              <div
+                class="place-type-item"
+                onclick="selectPlaceType(this, 'other')"
+              >
+                <i class="fas fa-plus"></i><span data-i18n="other">أخرى</span>
+              </div>
+            </div>
+
+            <div
+              class="input-group"
+              id="otherPlaceInput"
+              style="display: none; margin-top: 25px; margin-bottom: 0"
+            >
+              <label data-i18n="other_place_label"
+                >اكتب نوع المكان المخصص</label
+              >
+              <input
+                type="text"
+                id="customPlace"
+                data-i18n-ph="other_place_ph"
+                placeholder="مثال: محل تجاري، مصنع"
+              />
+              <i class="fas fa-pen"></i>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 20px; margin-top: 40px">
+            <button
+              type="button"
+              class="btn-primary btn-outline"
+              onclick="switchScreen('registerScreen', 'loginScreen')"
+            >
+              <span data-i18n="back_login">رجوع لتسجيل الدخول</span>
+            </button>
+            <button type="submit" class="btn-primary">
+              <span data-i18n="continue_meter">متابعة لربط العداد</span>
+              <i class="fas fa-arrow-left arrow-icon"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="chooseMeterMethodScreen" class="screen">
+      <div class="glass-card" style="width: 100%; max-width: 700px">
+        <h2 class="text-center mb-40" data-i18n="choose_meter_method">
+          طريقة ربط العداد
+        </h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px">
+          <div
+            class="place-type-item"
+            style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 20px;
+            "
+            onclick="scanNFC()"
+          >
+            <i
+              class="fas fa-wifi"
+              style="
+                font-size: 3.5rem;
+                margin-bottom: 20px;
+                color: var(--primary);
+              "
+            ></i>
+            <h3
+              style="
+                margin-bottom: 15px;
+                font-size: 1.5rem;
+                color: var(--text-color);
+              "
+              data-i18n="method_nfc"
+            >
+              مسح NFC
+            </h3>
+            <p
+              class="text-muted"
+              style="font-size: 1.1rem; line-height: 1.6"
+              data-i18n="nfc_desc"
+            >
+              قم بتقريب الهاتف من العداد الذكي للربط التلقائي
+            </p>
+          </div>
+
+          <div
+            class="place-type-item"
+            style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 20px;
+            "
+            onclick="
+              switchScreen('chooseMeterMethodScreen', 'manualMeterScreen')
+            "
+          >
+            <i
+              class="fas fa-keyboard"
+              style="font-size: 3.5rem; margin-bottom: 20px; color: var(--gold)"
+            ></i>
+            <h3
+              style="
+                margin-bottom: 15px;
+                font-size: 1.5rem;
+                color: var(--text-color);
+              "
+              data-i18n="method_manual"
+            >
+              إدخال يدوي
+            </h3>
+            <p
+              class="text-muted"
+              style="font-size: 1.1rem; line-height: 1.6"
+              data-i18n="manual_desc"
+            >
+              إدخال بيانات وقراءة العداد بنفسك يدوياً
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn-primary btn-outline"
+          style="margin-top: 30px"
+          onclick="switchScreen('chooseMeterMethodScreen', 'registerScreen')"
+        >
+          <span data-i18n="back_options">الرجوع للخطوة السابقة</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="manualMeterScreen" class="screen">
+      <div class="glass-card" style="width: 100%; max-width: 600px">
+        <h2 class="text-center mb-40" data-i18n="manual_meter">
+          الإدخال اليدوي لبيانات العداد
+        </h2>
+        <form onsubmit="handleMeterSubmit(event)">
+          <div class="input-group">
+            <label data-i18n="meter_8_label">رقم العداد (8 أرقام)</label>
+            <input
+              type="text"
+              data-i18n-ph="meter_8"
+              placeholder="أدخل 8 أرقام"
+              pattern="\d{8}"
+              maxlength="8"
+              required
+            />
+            <i class="fas fa-tachometer-alt"></i>
+          </div>
+          <div class="input-group">
+            <label data-i18n="monthly_cons_label"
+              >متوسط الاستهلاك الشهري التقديري (kWh)</label
+            >
+            <input
+              type="number"
+              data-i18n-ph="monthly_cons"
+              placeholder="مثال: 300"
+              required
+            />
+            <i class="fas fa-bolt"></i>
+          </div>
+          <div
+            class="input-group"
+            style="
+              background: var(--bg-color);
+              padding: 25px;
+              border-radius: 18px;
+              border: 1px dashed var(--primary);
+              margin-bottom: 30px;
+            "
+          >
+            <label
+              style="
+                margin-bottom: 15px;
+                color: var(--primary);
+                font-size: 1.1rem;
+              "
+              data-i18n="meter_photo"
+              ><i class="fas fa-camera"></i> صورة قراءة العداد الحالية:</label
+            >
+            <input
+              type="file"
+              accept="image/*"
+              required
+              style="
+                border: none;
+                padding: 0;
+                background: transparent;
+                width: 100%;
+              "
+            />
+            <p
+              style="
+                color: var(--text-muted);
+                font-size: 0.95rem;
+                margin-top: 15px;
+                background: rgba(0, 180, 216, 0.1);
+                padding: 15px;
+                border-radius: 10px;
+              "
+            >
+              <i class="fas fa-info-circle"></i>
+              <span data-i18n="photo_note"
+                >سيقوم النظام بطلب تحديث الصورة كل 5 أيام لضمان دقة
+                الحسابات.</span
+              >
+            </p>
+          </div>
+          <button
+            type="submit"
+            class="btn-primary btn-gold"
+            style="padding: 18px"
+          >
+            <span data-i18n="verify_continue">تحقق من البيانات ومتابعة</span>
+            <i class="fas fa-check-circle"></i>
+          </button>
+          <button
+            type="button"
+            class="btn-primary btn-outline"
+            style="margin-top: 15px"
+            onclick="
+              switchScreen('manualMeterScreen', 'chooseMeterMethodScreen')
+            "
+          >
+            <span data-i18n="back_options">الرجوع للخطوة السابقة</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="appliancesScreen" class="screen">
+      <div class="glass-card" style="width: 100%; max-width: 1200px">
+        <div class="text-center mb-40">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 15px;
+              color: var(--primary);
+              text-shadow: var(--glow);
+            "
+          >
+            <i class="fas fa-plug"></i>
+            <span data-i18n="choose_appliances">بناء بيئة المنزل الذكي</span>
+          </h2>
+          <p
+            class="text-muted"
+            style="font-size: 1.2rem"
+            data-i18n="appliances_notice"
+          >
+            أضف أجهزتك الكهربائية بقدراتها الحقيقية (بالوات) ليتمكن الذكاء
+            الاصطناعي من تتبعها.
+          </p>
+        </div>
+        <div class="device-form-container">
+          <div class="input-group" style="margin-bottom: 0">
+            <label data-i18n="device_name_label">اكتب اسم الجهاز</label>
+            <input
+              type="text"
+              id="devNameInput"
+              data-i18n-ph="device_name_ph"
+              placeholder="مثال: تكييف الصالة"
+            />
+            <i class="fas fa-tag"></i>
+          </div>
+          <div class="input-group" style="margin-bottom: 0">
+            <label data-i18n="device_brand_label">الشركة المصنعة</label>
+            <input
+              type="text"
+              id="devBrandInput"
+              data-i18n-ph="device_brand_ph"
+              placeholder="مثال: سامسونج"
+            />
+            <i class="fas fa-industry"></i>
+          </div>
+          <div class="input-group" style="margin-bottom: 0">
+            <label data-i18n="device_type_label">تصنيف الجهاز</label>
+            <select id="devTypeInput">
+              <option value="ac" data-i18n="ac">تكييف هواء</option>
+              <option value="fridge" data-i18n="fridge">ثلاجة / تبريد</option>
+              <option value="tv" data-i18n="tv">شاشة تلفاز / إلكترونيات</option>
+              <option value="washer" data-i18n="washer">غسالة</option>
+              <option value="heater" data-i18n="heater">
+                سخان مياه كهربائي
+              </option>
+              <option value="light" data-i18n="lights">إضاءة</option>
+              <option value="other" data-i18n="other_dev">أجهزة أخرى</option>
+            </select>
+            <i class="fas fa-list"></i>
+          </div>
+          <div class="input-group" style="margin-bottom: 0">
+            <label data-i18n="device_power_label">القدرة (Watt)</label>
+            <input
+              type="number"
+              id="devPowerInput"
+              data-i18n-ph="device_power_ph"
+              placeholder="مثال: 1500"
+            />
+            <i class="fas fa-bolt"></i>
+          </div>
+          <button
+            type="button"
+            class="btn-primary"
+            onclick="addCustomDevice()"
+            style="
+              height: 56px;
+              margin-bottom: 0;
+              margin-top: 32px;
+              width: auto;
+              padding: 0 40px;
+              border-radius: 14px;
+            "
+          >
+            <span data-i18n="add">إضافة للشبكة</span>
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+        <h3
+          style="
+            margin-bottom: 25px;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+          "
+          data-i18n="added_devices"
+        >
+          الأجهزة المضافة حالياً للشبكة
+        </h3>
+        <div class="added-devices-grid" id="addedDevicesGrid">
+          <p
+            id="emptyDeviceMsg"
+            style="
+              grid-column: 1 / -1;
+              text-align: center;
+              padding: 40px;
+              color: var(--text-muted);
+              font-size: 1.2rem;
+              border: 2px dashed var(--border-color);
+              border-radius: 20px;
+            "
+            data-i18n="empty_devices"
+          >
+            لم تقم بإضافة أي أجهزة بعد.
+          </p>
+        </div>
+        <div class="text-center" style="margin-top: 50px">
+          <button
+            type="button"
+            class="btn-primary btn-gold"
+            onclick="proceedToDashboard()"
+            style="
+              width: auto;
+              padding: 20px 60px;
+              font-size: 1.4rem;
+              border-radius: 50px;
+            "
+          >
+            <span data-i18n="build_dashboard">تفعيل لوحة التحكم الذكية</span>
+            <i class="fas fa-rocket" style="margin-right: 10px"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dashboardScreen" class="screen">
+      <header class="topbar" style="padding: 15px 5%; border-bottom: 1px solid rgba(0, 180, 216, 0.2); background: var(--card-bg); backdrop-filter: blur(30px);">
+        <div style="display: flex; align-items: center; gap: 40px;">
+            <h2
+            style="
+                color: var(--text-color);
+                font-weight: 900;
+                margin: 0;
+                font-size: 1.8rem;
+                letter-spacing: 1px;
+            "
+            >
+            WATTO<span style="color: var(--primary); font-weight: 400;"> | Enterprise</span>
+            </h2>
+            <div style="position: relative; width: 300px; display: none;" id="searchBarCorp">
+                <input type="text" placeholder="Search dashboard..." style="width: 100%; padding: 10px 40px 10px 20px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-color); font-size: 0.95rem; outline: none;">
+                <i class="fas fa-search" style="position: absolute; right: 15px; top: 12px; color: var(--text-muted);"></i>
+            </div>
+            <style>
+                @media(min-width: 1024px) {
+                    #searchBarCorp { display: block !important; }
+                }
+            </style>
+        </div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+          <div style="position: relative; cursor: pointer; padding: 10px;">
+              <i class="fas fa-bell" style="font-size: 1.2rem; color: var(--text-muted);"></i>
+              <span style="position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; background: var(--danger); border-radius: 50%; border: 2px solid var(--card-bg);"></span>
+          </div>
+          <button
+            type="button"
+            class="btn-primary btn-outline"
+            style="padding: 8px 16px; width: auto; font-size: 0.95rem; border-radius: 20px;"
+            onclick="switchScreen('dashboardScreen', 'topConsumersScreen')"
+          >
+            <i class="fas fa-chart-pie"></i>
+            <span data-i18n="top_consumers_btn">تحليل الاستهلاك</span>
+          </button>
+          <div style="display: flex; align-items: center; gap: 10px; padding-left: 15px; border-left: 2px solid var(--border-color);">
+              <div style="text-align: left; display: none;" id="corpAdminText">
+                  <div style="font-weight: bold; font-size: 0.95rem; color: var(--text-color);">Admin User</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">Executive</div>
+              </div>
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; box-shadow: var(--shadow-sm);" onclick="switchScreen('dashboardScreen', 'loginScreen')">
+                  <i class="fas fa-user-tie"></i>
+              </div>
+              <style>
+                  @media(min-width: 768px) {
+                      #corpAdminText { display: block !important; }
+                  }
+              </style>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-layout">
+        <aside style="display: flex; flex-direction: column; gap: 30px">
+          <div
+            class="glass-card"
+            style="
+              padding: 0;
+              overflow: hidden;
+              border-top: 6px solid var(--primary);
+            "
+          >
+            <h3
+              style="
+                padding: 25px 25px 15px;
+                margin: 0;
+                font-size: 1.3rem;
+                color: var(--text-color);
+                border-bottom: 1px solid var(--border-color);
+              "
+            >
+              <i class="fas fa-compass" style="color: var(--primary)"></i>
+              <span data-i18n="quick_nav">القائمة السريعة</span>
+            </h3>
+            <div style="display: flex; flex-direction: column">
+              <button
+                type="button"
+                class="sidebar-btn"
+                onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+              >
+                <i class="fas fa-chart-bar" style="color: var(--primary)"></i>
+                <span data-i18n="nav_overview">نظرة عامة</span>
+              </button>
+              <button
+                type="button"
+                class="sidebar-btn"
+                onclick="
+                  document
+                    .getElementById('iotControlsGrid')
+                    .scrollIntoView({ behavior: 'smooth' })
+                "
+              >
+                <i class="fas fa-plug" style="color: var(--danger)"></i>
+                <span data-i18n="nav_iot">محاكاة أجهزة IoT</span>
+              </button>
+              <button
+                type="button"
+                class="sidebar-btn"
+                onclick="switchScreen('dashboardScreen', 'forecastingScreen')"
+              >
+                <i class="fas fa-chart-line" style="color: var(--gold)"></i>
+                <span data-i18n="nav_forecast">توقع الاستهلاك</span>
+              </button>
+              <button type="button" class="sidebar-btn" onclick="generatePDF()">
+                <i class="fas fa-file-pdf" style="color: var(--eco-green)"></i>
+                <span data-i18n="nav_reports">التقارير</span>
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="glass-card"
+            style="padding: 35px 25px; border-top: 6px solid var(--eco-green)"
+          >
+            <h3 style="margin-bottom: 20px; font-size: 1.3rem">
+              <i class="fas fa-leaf" style="color: var(--eco-green)"></i>
+              <span data-i18n="eco_impact">الأثر البيئي الخاص بك</span>
+            </h3>
+            <div
+              class="flex-between text-center"
+              style="
+                background: var(--bg-color);
+                padding: 20px;
+                border-radius: 15px;
+              "
+            >
+              <div>
+                <h4
+                  style="
+                    color: var(--primary-dark);
+                    font-size: 1.8rem;
+                    font-weight: 900;
+                  "
+                >
+                  24 <small style="font-size: 1rem">kg</small>
+                </h4>
+                <p
+                  class="text-muted"
+                  style="font-size: 0.95rem; font-weight: bold"
+                  data-i18n="co2_saved"
+                >
+                  وفر CO2
+                </p>
+              </div>
+              <div
+                style="
+                  width: 2px;
+                  background: var(--border-color);
+                  height: 50px;
+                "
+              ></div>
+              <div>
+                <h4
+                  style="
+                    color: var(--eco-green);
+                    font-size: 1.8rem;
+                    font-weight: 900;
+                    text-shadow: 0 0 10px var(--eco-green);
+                  "
+                >
+                  3
+                </h4>
+                <p
+                  class="text-muted"
+                  style="font-size: 0.95rem; font-weight: bold"
+                  data-i18n="trees_saved"
+                >
+                  أشجار
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="glass-card"
+            style="
+              padding: 35px 25px;
+              text-align: center;
+              border-top: 6px solid var(--gold);
+            "
+          >
+            <h3 style="margin-bottom: 15px; font-size: 1.3rem">
+              <i
+                class="fas fa-robot"
+                style="color: var(--gold); font-size: 1.8rem"
+              ></i>
+            </h3>
+            <h3 style="margin-bottom: 15px" data-i18n="eco_mode">
+              وضع التوفير الذكي (AI)
+            </h3>
+            <p
+              class="text-muted"
+              style="font-size: 1rem; margin-bottom: 25px; line-height: 1.6"
+              data-i18n="eco_desc"
+            >
+              عند التفعيل، سيقوم النظام بالتدخل لفصل الأجهزة في أوقات الذروة
+              لتجنب الدخول في شريحة أعلى.
+            </p>
+            <div
+              style="
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 20px;
+                background: var(--bg-color);
+                border: 2px solid var(--border-color);
+                padding: 15px 30px;
+                border-radius: 40px;
+                cursor: pointer;
+                transition: 0.4s;
+              "
+              onclick="toggleEcoMode(this)"
+            >
+              <span
+                style="
+                  font-weight: 800;
+                  font-size: 1.1rem;
+                  color: var(--text-color);
+                "
+                data-i18n="activate_ai"
+                >تفعيل الذكاء الاصطناعي</span
+              >
+              <div class="toggle-switch" style="margin-top: 0"></div>
+            </div>
+          </div>
+        </aside>
+
+        <main>
+          <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-end;">
+              <div>
+                  <h1 style="font-size: 2.2rem; color: var(--text-color); margin-bottom: 5px;">Welcome back, <span style="color: var(--primary);">Admin</span></h1>
+                  <p style="color: var(--text-muted); font-size: 1.1rem;"><i class="fas fa-calendar-alt"></i> Here is what's happening with your energy network today.</p>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                  <button type="button" class="btn-primary btn-outline" style="padding: 8px 15px; font-size: 0.9rem; border-radius: 8px;" onclick="generatePDF()">
+                      <i class="fas fa-download"></i> Export
+                  </button>
+                  <button type="button" class="btn-primary" style="padding: 8px 15px; font-size: 0.9rem; border-radius: 8px;" onclick="switchScreen('dashboardScreen', 'forecastingScreen')">
+                      <i class="fas fa-magic"></i> AI Forecast
+                  </button>
+              </div>
+          </div>
+          <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="stat-card bg-gradient-blue">
+              <h3 data-i18n="current_consump_month">
+                الاستهلاك التقديري (هذا الشهر)
+              </h3>
+              <h2 id="uiTotalKwh">
+                0
+                <span
+                  style="font-size: 1.2rem; font-weight: normal; opacity: 0.8"
+                  >kWh</span
+                >
+              </h2>
+              <div style="margin-top: 15px; font-size: 0.9rem; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px; display: inline-block;">
+                  <i class="fas fa-arrow-up"></i> <span data-i18n="vs_last_month">2.4% vs last month</span>
+              </div>
+              <i class="fas fa-bolt"></i>
+            </div>
+            <div class="stat-card bg-gradient-gold">
+              <h3 data-i18n="expected_bill">تكلفة الفاتورة التقديرية</h3>
+              <h2 id="uiTotalBill">
+                0
+                <span
+                  style="font-size: 1.2rem; font-weight: normal; opacity: 0.8"
+                  >ج.م</span
+                >
+              </h2>
+              <div style="margin-top: 15px; font-size: 0.9rem; background: rgba(0,0,0,0.1); padding: 5px 10px; border-radius: 20px; display: inline-block;">
+                  <i class="fas fa-arrow-down" style="color: #059669;"></i> <span data-i18n="percent_saved">-1.2% saved</span>
+              </div>
+              <i class="fas fa-wallet"></i>
+            </div>
+            <div class="stat-card bg-gradient-purple">
+              <h3 data-i18n="active_devices">الأجهزة النشطة حالياً</h3>
+              <h2 id="uiActiveCount">0</h2>
+              <div style="margin-top: 15px; font-size: 0.9rem; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px; display: inline-block;">
+                  <i class="fas fa-network-wired"></i> <span data-i18n="system_optimal">System Optimal</span>
+              </div>
+              <i class="fas fa-broadcast-tower"></i>
+            </div>
+            <div class="stat-card bg-gradient-green">
+              <h3 data-i18n="efficiency_title">كفاءة النظام (Efficiency)</h3>
+              <h2>
+                94<span style="font-size: 1.5rem; font-weight: normal; opacity: 0.8">%</span>
+              </h2>
+              <div style="margin-top: 15px; font-size: 0.9rem; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px; display: inline-block;">
+                  <i class="fas fa-check-circle"></i> <span data-i18n="ai_active_badge">AI Eco Mode Active</span>
+              </div>
+              <i class="fas fa-leaf"></i>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 40px; margin-bottom: 40px;">
+              <!-- Energy Distribution -->
+              <div class="glass-card" style="padding: 30px;">
+                  <h3 style="font-size: 1.4rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+                      <i class="fas fa-chart-pie" style="color: var(--primary);"></i> <span data-i18n="energy_dist_title">Energy Distribution</span>
+                  </h3>
+                  <div style="height: 250px; position: relative;">
+                      <canvas id="energyDistributionChart"></canvas>
+                  </div>
+              </div>
+              
+              <!-- Real-time Cost Analysis -->
+              <div class="glass-card" style="padding: 30px;">
+                  <h3 style="font-size: 1.4rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+                      <i class="fas fa-money-bill-wave" style="color: var(--gold);"></i> <span data-i18n="rt_cost_title">Real-time Cost Analysis</span>
+                  </h3>
+                  <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 20px;">
+                      <div style="background: var(--bg-color); padding: 20px; border-radius: 15px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; transition: transform 0.3s ease;">
+                          <div>
+                              <p style="color: var(--text-muted); font-size: 0.95rem; font-weight: bold;" data-i18n="daily_cost_est">Daily Cost (Est.)</p>
+                              <h2 style="color: var(--primary); font-size: 2rem; margin-top: 5px;" id="dailyCostUI">0 <span style="font-size: 1rem; color: var(--text-muted); font-weight: normal;">EGP</span></h2>
+                          </div>
+                          <div style="width: 50px; height: 50px; background: rgba(0, 245, 212, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary);">
+                              <i class="fas fa-calendar-day"></i>
+                          </div>
+                      </div>
+                      
+                      <div style="background: var(--bg-color); padding: 20px; border-radius: 15px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; transition: transform 0.3s ease;">
+                          <div>
+                              <p style="color: var(--text-muted); font-size: 0.95rem; font-weight: bold;" data-i18n="proj_monthly">Projected Monthly</p>
+                              <h2 style="color: var(--danger); font-size: 2rem; margin-top: 5px;" id="projectedMonthlyUI">0 <span style="font-size: 1rem; color: var(--text-muted); font-weight: normal;">EGP</span></h2>
+                          </div>
+                          <div style="width: 50px; height: 50px; background: rgba(255, 77, 77, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--danger);">
+                              <i class="fas fa-chart-line"></i>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="glass-card" style="padding: 40px; margin-bottom: 40px">
+            <div
+              class="flex-between mb-40"
+              style="
+                border-bottom: 2px solid var(--border-color);
+                padding-bottom: 20px;
+              "
+            >
+              <div>
+                <h3
+                  style="
+                    font-size: 1.6rem;
+                    font-weight: 800;
+                    color: var(--primary);
+                    text-shadow: var(--glow);
+                  "
+                >
+                  <i class="fas fa-sliders-h"></i>
+                  <span data-i18n="iot_title"
+                    >لوحة التحكم في الأجهزة (Live)</span
+                  >
+                </h3>
+                <p
+                  class="text-muted"
+                  style="margin-top: 8px; font-size: 1.05rem"
+                  data-i18n="iot_desc"
+                >
+                  جرب فصل أي جهاز ولاحظ التأثير اللحظي على الاستهلاك لتختبر
+                  كفاءة النظام.
+                </p>
+              </div>
+              <span
+                class="badge badge-success"
+                style="font-size: 1rem; padding: 10px 20px"
+                ><i class="fas fa-wifi"></i>
+                <span data-i18n="network_active">متصل بالشبكة</span></span
+              >
+            </div>
+            <div class="iot-grid" id="iotControlsGrid"></div>
+          </div>
+
+          <div class="glass-card" style="padding: 40px">
+            <div
+              style="
+                border-bottom: 2px solid var(--border-color);
+                padding-bottom: 20px;
+                margin-bottom: 30px;
+              "
+            >
+              <h3 style="font-size: 1.5rem">
+                <i class="fas fa-chart-area" style="color: var(--primary)"></i>
+                <span data-i18n="chart_line">مراقبة منحنى الاستهلاك</span>
+              </h3>
+            </div>
+            <div style="height: 350px">
+              <canvas id="mainChart"></canvas>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div id="forecastingScreen" class="screen">
+      <header class="topbar">
+        <h2
+          style="
+            color: var(--primary);
+            font-weight: 900;
+            margin: 0;
+            font-size: 1.8rem;
+            text-shadow: var(--glow);
+          "
+        >
+          <i class="fas fa-chart-line"></i>
+          <span data-i18n="forecasting_title"
+            >توقع الاستهلاك (Forecasting)</span
+          >
+        </h2>
+        <button
+          type="button"
+          class="btn-primary btn-outline"
+          style="padding: 10px 25px; width: auto"
+          onclick="switchScreen('forecastingScreen', 'dashboardScreen')"
+        >
+          <span data-i18n="back_dash">العودة للوحة التحكم</span>
+          <i class="fas fa-arrow-left arrow-icon"></i>
+        </button>
+      </header>
+      <div
+        style="
+          width: 100%;
+          max-width: 900px;
+          padding: 60px 20px;
+          margin: 0 auto;
+        "
+      >
+        <div class="glass-card" style="padding: 50px; text-align: center">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 20px;
+              color: var(--text-color);
+            "
+            data-i18n="forecasting_title"
+          >
+            توقع الاستهلاك المستقبلي
+          </h2>
+          <div
+            style="
+              background: rgba(0, 180, 216, 0.05);
+              border: 2px dashed var(--primary);
+              padding: 50px;
+              border-radius: 20px;
+              margin-top: 30px;
+            "
+          >
+            <i
+              class="fas fa-robot"
+              style="
+                font-size: 4rem;
+                color: var(--primary);
+                margin-bottom: 20px;
+                text-shadow: var(--glow);
+              "
+            ></i>
+            <p
+              style="
+                font-size: 1.3rem;
+                line-height: 1.8;
+                color: var(--text-muted);
+              "
+              data-i18n="forecasting_desc"
+            >
+              بناءً على خوارزميات الذكاء الاصطناعي ومعدل سحبك الحالي، الاستهلاك
+              المتوقع للشهر القادم هو:
+            </p>
+
+            <h1
+              style="
+                font-size: 4.5rem;
+                color: var(--danger);
+                margin: 25px 0;
+                text-shadow: 0 0 20px rgba(255, 23, 68, 0.3);
+              "
+              id="forecastValueUI"
+            >
+              0
+              <span
+                style="
+                  font-size: 1.8rem;
+                  color: var(--text-muted);
+                  font-weight: normal;
+                "
+                >kWh</span
+              >
+            </h1>
+
+            <div
+              style="
+                background: rgba(0, 230, 118, 0.1);
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 30px;
+              "
+            >
+              <i
+                class="fas fa-lightbulb"
+                style="
+                  color: var(--eco-green);
+                  font-size: 1.5rem;
+                  margin-bottom: 10px;
+                "
+              ></i>
+              <p
+                style="
+                  color: var(--eco-green);
+                  font-weight: bold;
+                  font-size: 1.1rem;
+                  margin: 0;
+                "
+                id="forecastSavingTips"
+              ></p>
+            </div>
+
+            <button
+              class="btn-primary btn-gold"
+              style="
+                width: auto;
+                padding: 15px 40px;
+                font-size: 1.2rem;
+                border-radius: 30px;
+                box-shadow: var(--shadow-lg);
+              "
+              onclick="
+                updateSystemCalculations();
+                showToast(
+                  isAr
+                    ? 'تم جلب أحدث التوقعات بنجاح'
+                    : 'Forecast fetched successfully',
+                  'success',
+                );
+              "
+            >
+              <i class="fas fa-sync"></i>
+              <span data-i18n="update_forecast">تحديث التوقعات</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="leaderboardScreen" class="screen">
+      <header class="topbar">
+        <h2
+          style="
+            color: var(--gold);
+            font-weight: 900;
+            margin: 0;
+            font-size: 1.8rem;
+          "
+        >
+          <i class="fas fa-crown"></i>
+          <span data-i18n="leaderboard_title"
+            >أبطال التوفير (الترتيب العام)</span
+          >
+        </h2>
+        <button
+          type="button"
+          class="btn-primary btn-outline"
+          style="padding: 10px 25px; width: auto"
+          onclick="switchScreen('leaderboardScreen', 'dashboardScreen')"
+        >
+          <span data-i18n="back_dash">العودة للوحة التحكم</span>
+          <i class="fas fa-arrow-left arrow-icon"></i>
+        </button>
+      </header>
+      <div
+        style="
+          width: 100%;
+          max-width: 900px;
+          padding: 60px 20px;
+          margin: 0 auto;
+        "
+      >
+        <div class="glass-card" style="padding: 50px">
+          <div style="text-align: center; margin-bottom: 40px">
+            <h2
+              style="
+                font-size: 2.2rem;
+                margin-bottom: 10px;
+                color: var(--text-color);
+              "
+              data-i18n="leaderboard_title"
+            >
+              لوحة الشرف الأسبوعية
+            </h2>
+            <p
+              class="text-muted"
+              style="font-size: 1.1rem"
+              data-i18n="leaderboard_desc"
+            >
+              هؤلاء هم المستخدمون الذين حققوا أعلى معدلات توفير للكهرباء مقارنة
+              باستهلاكهم المعتاد. استمر في التوفير لتصعد للقمة!
+            </p>
+          </div>
+          <div class="rank-list">
+            <div class="rank-item gold">
+              <div class="rank-info">
+                <div class="rank-num"><i class="fas fa-medal"></i></div>
+                <div>
+                  <h3
+                    style="
+                      margin: 0;
+                      font-size: 1.3rem;
+                      color: var(--text-color);
+                    "
+                  >
+                    سارة محمود
+                  </h3>
+                  <p
+                    style="margin: 0; font-size: 1rem; color: var(--text-muted)"
+                  >
+                    <i class="fas fa-map-marker-alt"></i> القاهرة
+                  </p>
+                </div>
+              </div>
+              <div style="text-align: left">
+                <h3
+                  style="
+                    color: var(--eco-green);
+                    margin: 0;
+                    font-size: 1.6rem;
+                    font-weight: 900;
+                  "
+                >
+                  85 <small style="font-size: 1rem">kWh</small>
+                </h3>
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 0.9rem;
+                    font-weight: bold;
+                    color: var(--text-muted);
+                  "
+                  data-i18n="saved_amount"
+                >
+                  طاقة تم توفيرها
+                </p>
+              </div>
+            </div>
+            <div class="rank-item silver">
+              <div class="rank-info">
+                <div class="rank-num">2</div>
+                <div>
+                  <h3
+                    style="
+                      margin: 0;
+                      font-size: 1.3rem;
+                      color: var(--text-color);
+                    "
+                  >
+                    أحمد علي
+                  </h3>
+                  <p
+                    style="margin: 0; font-size: 1rem; color: var(--text-muted)"
+                  >
+                    <i class="fas fa-map-marker-alt"></i> الإسكندرية
+                  </p>
+                </div>
+              </div>
+              <div style="text-align: left">
+                <h3
+                  style="
+                    color: var(--eco-green);
+                    margin: 0;
+                    font-size: 1.6rem;
+                    font-weight: 900;
+                  "
+                >
+                  72 <small style="font-size: 1rem">kWh</small>
+                </h3>
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 0.9rem;
+                    font-weight: bold;
+                    color: var(--text-muted);
+                  "
+                  data-i18n="saved_amount"
+                >
+                  طاقة تم توفيرها
+                </p>
+              </div>
+            </div>
+            <div class="rank-item bronze">
+              <div class="rank-info">
+                <div class="rank-num">3</div>
+                <div>
+                  <h3
+                    style="
+                      margin: 0;
+                      font-size: 1.3rem;
+                      color: var(--text-color);
+                    "
+                  >
+                    عمر حسن
+                  </h3>
+                  <p
+                    style="margin: 0; font-size: 1rem; color: var(--text-muted)"
+                  >
+                    <i class="fas fa-map-marker-alt"></i> الجيزة
+                  </p>
+                </div>
+              </div>
+              <div style="text-align: left">
+                <h3
+                  style="
+                    color: var(--eco-green);
+                    margin: 0;
+                    font-size: 1.6rem;
+                    font-weight: 900;
+                  "
+                >
+                  60 <small style="font-size: 1rem">kWh</small>
+                </h3>
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 0.9rem;
+                    font-weight: bold;
+                    color: var(--text-muted);
+                  "
+                  data-i18n="saved_amount"
+                >
+                  طاقة تم توفيرها
+                </p>
+              </div>
+            </div>
+            <div
+              class="rank-item"
+              style="
+                border: 2px dashed var(--primary);
+                background: rgba(0, 180, 216, 0.05);
+                margin-top: 15px;
+              "
+            >
+              <div class="rank-info">
+                <div
+                  class="rank-num"
+                  style="color: var(--primary); font-size: 1.3rem"
+                >
+                  45
+                </div>
+                <div>
+                  <h3
+                    style="margin: 0; font-size: 1.3rem; color: var(--primary)"
+                    data-i18n="you"
+                  >
+                    أنت (حساب الاختبار)
+                  </h3>
+                  <p
+                    style="
+                      margin: 0;
+                      font-size: 1rem;
+                      color: var(--primary);
+                      font-weight: bold;
+                    "
+                    data-i18n="keep_saving"
+                  >
+                    استمر في التوفير!
+                  </p>
+                </div>
+              </div>
+              <div style="text-align: left">
+                <h3
+                  style="
+                    color: var(--primary);
+                    margin: 0;
+                    font-size: 1.6rem;
+                    font-weight: 900;
+                  "
+                >
+                  12 <small style="font-size: 1rem">kWh</small>
+                </h3>
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 0.9rem;
+                    font-weight: bold;
+                    color: var(--text-muted);
+                  "
+                  data-i18n="saved_amount"
+                >
+                  طاقة تم توفيرها
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="topConsumersScreen" class="screen">
+      <header class="topbar">
+        <h2
+          style="
+            color: var(--primary);
+            font-weight: 900;
+            margin: 0;
+            font-size: 1.8rem;
+          "
+        >
+          <i class="fas fa-chart-pie"></i>
+          <span data-i18n="analysis_title">تقرير التحليل المفصل</span>
+        </h2>
+        <button
+          type="button"
+          class="btn-primary btn-outline"
+          style="padding: 10px 25px; width: auto"
+          onclick="switchScreen('topConsumersScreen', 'dashboardScreen')"
+        >
+          <span data-i18n="back_dash">العودة للوحة التحكم</span>
+          <i class="fas fa-arrow-left arrow-icon"></i>
+        </button>
+      </header>
+      <div
+        style="
+          width: 100%;
+          max-width: 1100px;
+          padding: 60px 20px;
+          margin: 0 auto;
+        "
+      >
+        <div class="glass-card" style="padding: 60px">
+          <div style="text-align: center; margin-bottom: 50px">
+            <div
+              style="
+                width: 80px;
+                height: 80px;
+                background: rgba(255, 23, 68, 0.1);
+                color: var(--danger);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.5rem;
+                margin: 0 auto 20px auto;
+              "
+            >
+              <i class="fas fa-fire"></i>
+            </div>
+            <h2
+              style="
+                color: var(--danger);
+                font-size: 2.2rem;
+                margin-bottom: 15px;
+              "
+              data-i18n="top_consumers_title"
+            >
+              الأجهزة الأكثر سحباً للطاقة
+            </h2>
+            <p
+              class="text-muted"
+              style="font-size: 1.2rem; max-width: 700px; margin: 0 auto"
+              data-i18n="top_consumers_desc"
+            >
+              ترتيب تنازلي لأجهزتك النشطة التي تتسبب في الجزء الأكبر من قيمة
+              الفاتورة. قم بإغلاق الأجهزة ذات النسبة العالية إذا لم تكن في حاجة
+              لها.
+            </p>
+          </div>
+          <div
+            id="topConsumersList"
+            style="display: flex; flex-direction: column; gap: 20px"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="adminDashboardScreen" class="screen">
+      <header
+        class="topbar"
+        style="
+          border-bottom: 2px solid var(--admin);
+          padding: 20px 5%;
+          background: var(--card-bg);
+        "
+      >
+        <div style="display: flex; align-items: center; gap: 20px">
+          <div
+            style="
+              width: 55px;
+              height: 55px;
+              background: linear-gradient(135deg, #a855f7, #8b5cf6);
+              color: white;
+              border-radius: 16px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 1.8rem;
+              box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+            "
+          >
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div>
+            <h1
+              style="
+                font-weight: 900;
+                font-size: 1.8rem;
+                color: var(--admin);
+                margin: 0;
+                letter-spacing: 1px;
+              "
+            >
+              WATTO ADMIN CENTER
+            </h1>
+            <p
+              style="
+                color: var(--text-muted);
+                font-size: 0.95rem;
+                font-weight: bold;
+              "
+            >
+              نظام الإدارة المركزي لشبكة الطاقة (محافظة البحيرة - دمنهور)
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn-primary btn-danger"
+          style="padding: 12px 30px; width: auto; border-radius: 12px"
+          onclick="switchScreen('adminDashboardScreen', 'loginScreen')"
+        >
+          <span data-i18n="logout">تسجيل الخروج</span>
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </header>
+
+      <div
+        style="width: 100%; max-width: 1600px; padding: 50px 5%; margin: 0 auto"
+      >
+        <div
+          class="stats-grid"
+          style="
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 50px;
+          "
+        >
+          <div
+            class="glass-card"
+            style="padding: 30px; display: flex; align-items: center; gap: 25px"
+          >
+            <i
+              class="fas fa-users"
+              style="
+                font-size: 3rem;
+                color: var(--primary);
+                background: rgba(0, 180, 216, 0.1);
+                padding: 15px;
+                border-radius: 15px;
+              "
+            ></i>
+            <div>
+              <h3 style="color: var(--text-muted); font-size: 1.1rem">
+                المشتركون النشطون
+              </h3>
+              <h2
+                style="
+                  color: var(--text-color);
+                  font-size: 2.2rem;
+                  font-weight: 900;
+                "
+              >
+                2,450
+              </h2>
+            </div>
+          </div>
+          <div
+            class="glass-card"
+            style="padding: 30px; display: flex; align-items: center; gap: 25px"
+          >
+            <i
+              class="fas fa-industry"
+              style="
+                font-size: 3rem;
+                color: var(--danger);
+                background: rgba(255, 23, 68, 0.1);
+                padding: 15px;
+                border-radius: 15px;
+              "
+            ></i>
+            <div>
+              <h3 style="color: var(--text-muted); font-size: 1.1rem">
+                الحمل الكلي للشبكة
+              </h3>
+              <h2
+                style="
+                  color: var(--text-color);
+                  font-size: 2.2rem;
+                  font-weight: 900;
+                "
+              >
+                18.5
+                <small style="font-size: 1.2rem; color: var(--text-muted)"
+                  >MW</small
+                >
+              </h2>
+            </div>
+          </div>
+          <div
+            class="glass-card"
+            style="padding: 30px; display: flex; align-items: center; gap: 25px"
+          >
+            <i
+              class="fas fa-leaf"
+              style="
+                font-size: 3rem;
+                color: var(--eco-green);
+                background: rgba(0, 230, 118, 0.1);
+                padding: 15px;
+                border-radius: 15px;
+              "
+            ></i>
+            <div>
+              <h3 style="color: var(--text-muted); font-size: 1.1rem">
+                الطاقة الموفرة (AI)
+              </h3>
+              <h2
+                style="
+                  color: var(--text-color);
+                  font-size: 2.2rem;
+                  font-weight: 900;
+                "
+              >
+                4,200
+                <small style="font-size: 1.2rem; color: var(--text-muted)"
+                  >kWh</small
+                >
+              </h2>
+            </div>
+          </div>
+          <div
+            class="glass-card"
+            style="padding: 30px; display: flex; align-items: center; gap: 25px"
+          >
+            <i
+              class="fas fa-coins"
+              style="
+                font-size: 3rem;
+                color: var(--gold);
+                background: rgba(255, 234, 0, 0.1);
+                padding: 15px;
+                border-radius: 15px;
+              "
+            ></i>
+            <div>
+              <h3 style="color: var(--text-muted); font-size: 1.1rem">
+                الإيرادات المتوقعة
+              </h3>
+              <h2
+                style="
+                  color: var(--text-color);
+                  font-size: 2.2rem;
+                  font-weight: 900;
+                "
+              >
+                850K
+                <small style="font-size: 1.2rem; color: var(--text-muted)"
+                  >ج.م</small
+                >
+              </h2>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 40px;
+            align-items: start;
+          "
+        >
+          <div class="admin-table-container" style="background: var(--card-bg)">
+            <div
+              style="
+                padding: 30px;
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <h3 style="color: var(--admin); margin: 0; font-size: 1.4rem">
+                <i class="fas fa-satellite-dish"></i> المراقبة الحية لاستهلاك
+                المشتركين
+              </h3>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>بيانات المشترك</th>
+                  <th>الرقم القومي</th>
+                  <th>الاستهلاك (kWh)</th>
+                  <th>الفاتورة (ج.م)</th>
+                  <th>حالة الذروة</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="adminTableBody">
+                <tr>
+                  <td>
+                    <strong style="font-size: 1.1rem; color: var(--text-color)"
+                      >علي محمود الدسوقي</strong
+                    ><br /><small
+                      style="color: var(--text-muted); font-weight: bold"
+                      ><i class="fas fa-map-marker-alt"></i> شقة - دمنهور</small
+                    >
+                  </td>
+                  <td
+                    style="
+                      font-family: monospace;
+                      font-size: 1.15rem;
+                      color: var(--text-muted);
+                    "
+                  >
+                    28801010000000
+                  </td>
+                  <td
+                    style="
+                      font-weight: 900;
+                      font-size: 1.2rem;
+                      color: var(--danger);
+                    "
+                  >
+                    1,250
+                  </td>
+                  <td style="font-weight: bold; font-size: 1.1rem">1,850</td>
+                  <td>
+                    <span class="badge badge-danger"
+                      ><i class="fas fa-exclamation-triangle"></i> خطر
+                      تجاوز</span
+                    >
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-primary btn-danger"
+                      style="
+                        padding: 10px 15px;
+                        font-size: 0.95rem;
+                        border-radius: 8px;
+                        width: 100px;
+                      "
+                      onclick="
+                        showToast('تم إرسال إنذار فصل نهائي للعداد', 'error')
+                      "
+                    >
+                      إنذار فصل
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong style="font-size: 1.1rem; color: var(--text-color)"
+                      >هبة الله أحمد</strong
+                    ><br /><small
+                      style="color: var(--text-muted); font-weight: bold"
+                      ><i class="fas fa-map-marker-alt"></i> عمارة - كفر
+                      الدوار</small
+                    >
+                  </td>
+                  <td
+                    style="
+                      font-family: monospace;
+                      font-size: 1.15rem;
+                      color: var(--text-muted);
+                    "
+                  >
+                    29910120000000
+                  </td>
+                  <td
+                    style="
+                      font-weight: 900;
+                      font-size: 1.2rem;
+                      color: var(--primary);
+                    "
+                  >
+                    320
+                  </td>
+                  <td style="font-weight: bold; font-size: 1.1rem">280</td>
+                  <td>
+                    <span class="badge badge-success"
+                      ><i class="fas fa-check"></i> استهلاك آمن</span
+                    >
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-primary btn-outline"
+                      style="
+                        padding: 10px 15px;
+                        font-size: 0.95rem;
+                        border-radius: 8px;
+                        border-color: var(--admin);
+                        color: var(--admin);
+                        width: 100px;
+                      "
+                    >
+                      عرض الملف
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 30px">
+            <div
+              class="glass-card"
+              style="
+                padding: 40px 30px;
+                background: var(--card-bg);
+                border-top: 6px solid var(--admin);
+              "
+            >
+              <h3
+                style="
+                  color: var(--admin);
+                  margin-bottom: 25px;
+                  font-size: 1.3rem;
+                "
+              >
+                <i class="fas fa-coins"></i> إدارة تسعيرة الشرائح
+              </h3>
+              <p
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.95rem;
+                  margin-bottom: 30px;
+                  font-weight: bold;
+                "
+              >
+                تحديث الأسعار هنا سيتم تطبيقه فوراً على النظام المركزي.
+              </p>
+              <div class="input-group" style="margin-bottom: 15px">
+                <label style="color: var(--text-color); font-size: 0.9rem"
+                  >شريحة 1 (0-50 kWh)</label
+                >
+                <input
+                  type="number"
+                  id="t1Price"
+                  value="0.58"
+                  step="0.01"
+                  style="
+                    background: var(--input-bg);
+                    font-weight: bold;
+                    color: var(--primary);
+                  "
+                />
+              </div>
+              <div class="input-group" style="margin-bottom: 15px">
+                <label style="color: var(--text-color); font-size: 0.9rem"
+                  >شريحة 2 (51-100 kWh)</label
+                >
+                <input
+                  type="number"
+                  id="t2Price"
+                  value="0.68"
+                  step="0.01"
+                  style="
+                    background: var(--input-bg);
+                    font-weight: bold;
+                    color: var(--primary);
+                  "
+                />
+              </div>
+              <div class="input-group" style="margin-bottom: 30px">
+                <label style="color: var(--text-color); font-size: 0.9rem"
+                  >شريحة 3 (101-200 kWh)</label
+                >
+                <input
+                  type="number"
+                  id="t3Price"
+                  value="0.83"
+                  step="0.01"
+                  style="
+                    background: var(--input-bg);
+                    font-weight: bold;
+                    color: var(--primary);
+                  "
+                />
+              </div>
+              <button
+                type="button"
+                class="btn-primary"
+                style="
+                  background: var(--admin);
+                  padding: 16px;
+                  font-size: 1.1rem;
+                  border-radius: 12px;
+                  box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+                "
+                onclick="updateAdminTariffs()"
+              >
+                حفظ وتطبيق بالشبكة <i class="fas fa-save"></i>
+              </button>
+            </div>
+
+            <div
+              class="glass-card"
+              style="
+                padding: 40px 30px;
+                background: var(--card-bg);
+                border-top: 6px solid var(--danger);
+              "
+            >
+              <h3
+                style="
+                  color: var(--danger);
+                  margin-bottom: 25px;
+                  font-size: 1.3rem;
+                "
+              >
+                <i class="fas fa-exclamation-circle"></i>
+                <span data-i18n="admin_analysis_title"
+                  >تحليل المناطق والإنذارات</span
+                >
+              </h3>
+
+              <div
+                style="
+                  background: rgba(255, 23, 68, 0.05);
+                  border: 1px dashed var(--danger);
+                  padding: 15px;
+                  border-radius: 12px;
+                  margin-bottom: 20px;
+                "
+              >
+                <h4
+                  style="
+                    font-size: 1rem;
+                    color: var(--text-color);
+                    margin-bottom: 5px;
+                  "
+                >
+                  <i
+                    class="fas fa-map-marker-alt"
+                    style="color: var(--danger)"
+                  ></i>
+                  <span data-i18n="highest_consumption_region"
+                    >المنطقة الأكثر استهلاكاً</span
+                  >
+                </h4>
+                <p
+                  style="
+                    font-size: 1.1rem;
+                    font-weight: bold;
+                    color: var(--danger);
+                    margin-bottom: 10px;
+                  "
+                >
+                  شبرا - دمنهور
+                  <span style="font-size: 0.9rem; color: var(--text-muted)"
+                    >(4.5 MW)</span
+                  >
+                </p>
+                <button
+                  type="button"
+                  class="btn-primary btn-outline"
+                  style="
+                    padding: 8px;
+                    font-size: 0.9rem;
+                    border-radius: 8px;
+                    border-color: var(--danger);
+                    color: var(--danger);
+                    width: 100%;
+                  "
+                  onclick="
+                    showToast(
+                      isAr
+                        ? 'تم إرسال تقرير لشركة الكهرباء بنجاح'
+                        : 'Report sent to Electricity Co.',
+                      'success',
+                    )
+                  "
+                >
+                  <i class="fas fa-envelope"></i>
+                  <span data-i18n="contact_electricity_co"
+                    >مراسلة شركة الكهرباء</span
+                  >
+                </button>
+              </div>
+
+              <div
+                style="
+                  background: rgba(255, 234, 0, 0.1);
+                  border: 1px dashed var(--gold);
+                  padding: 15px;
+                  border-radius: 12px;
+                  margin-bottom: 20px;
+                "
+              >
+                <h4
+                  style="
+                    font-size: 1rem;
+                    color: var(--text-color);
+                    margin-bottom: 5px;
+                  "
+                >
+                  <i class="fas fa-mask" style="color: #f59e0b"></i>
+                  <span data-i18n="suspected_theft">اشتباه سرقة تيار</span>
+                </h4>
+                <p
+                  style="
+                    font-size: 0.85rem;
+                    color: var(--text-muted);
+                    margin-bottom: 10px;
+                    font-weight: bold;
+                  "
+                  data-i18n="high_cons_low_bill"
+                >
+                  (استهلاك عالي - فاتورة قليلة)
+                </p>
+                <p
+                  style="
+                    font-size: 1rem;
+                    font-weight: bold;
+                    color: #0f172a;
+                    margin-bottom: 10px;
+                  "
+                >
+                  كفر الدوار - بلوك 4
+                </p>
+                <button
+                  type="button"
+                  class="btn-primary"
+                  style="
+                    background: linear-gradient(135deg, #f59e0b, #d97706);
+                    padding: 8px;
+                    font-size: 0.9rem;
+                    border-radius: 8px;
+                    width: 100%;
+                    box-shadow: none;
+                  "
+                  onclick="
+                    showToast(
+                      isAr
+                        ? 'تم تسجيل بلاغ سرقة تيار وتوجيه مباحث الكهرباء'
+                        : 'Theft report registered.',
+                      'success',
+                    )
+                  "
+                >
+                  <i class="fas fa-gavel"></i>
+                  <span data-i18n="report_theft">إبلاغ عن سرقة كهرباء</span>
+                </button>
+              </div>
+
+              <div
+                style="
+                  background: rgba(0, 180, 216, 0.1);
+                  border: 1px dashed var(--primary);
+                  padding: 15px;
+                  border-radius: 12px;
+                "
+              >
+                <h4
+                  style="
+                    font-size: 1rem;
+                    color: var(--text-color);
+                    margin-bottom: 5px;
+                  "
+                >
+                  <i class="fas fa-search" style="color: var(--primary)"></i>
+                  <span data-i18n="technical_check_req">فحص فني مطلوب</span>
+                </h4>
+                <p
+                  style="
+                    font-size: 0.85rem;
+                    color: var(--text-muted);
+                    margin-bottom: 10px;
+                    font-weight: bold;
+                  "
+                  data-i18n="low_cons_high_bill"
+                >
+                  (استهلاك قليل - فاتورة عالية)
+                </p>
+                <p
+                  style="
+                    font-size: 1rem;
+                    font-weight: bold;
+                    color: #0f172a;
+                    margin-bottom: 10px;
+                  "
+                >
+                  أبو حمص - شارع المحطة
+                </p>
+                <button
+                  type="button"
+                  class="btn-primary btn-outline"
+                  style="
+                    padding: 8px;
+                    font-size: 0.9rem;
+                    border-radius: 8px;
+                    width: 100%;
+                  "
+                  onclick="
+                    showToast(
+                      isAr
+                        ? 'تم إرسال طلب مراجعة للشركة لاحتمالية عطل بالعداد'
+                        : 'Review request sent to company.',
+                      'success',
+                    )
+                  "
+                >
+                  <i class="fas fa-tools"></i>
+                  <span data-i18n="report_review">إبلاغ لمراجعة الفاتورة</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chatbot-fab" onclick="toggleChatbot()">
+      <i class="fas fa-robot"></i>
+    </div>
+
+    <div class="chatbot-window" id="chatbotWindow">
+      <div class="chat-header">
+        <span style="font-size: 1.2rem"
+          ><i class="fas fa-robot"></i> WATTO AI</span
+        >
+        <i
+          class="fas fa-times"
+          style="cursor: pointer; font-size: 1.3rem"
+          onclick="toggleChatbot()"
+        ></i>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="chat-msg bot" data-i18n="bot_welcome">
+          أهلاً بك! أنا مساعدك الذكي المدمج في نظام WATTO. كيف يمكنني مساعدتك في
+          توفير الطاقة وخفض فاتورتك اليوم؟
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input
+          type="text"
+          id="chatInput"
+          data-i18n-ph="type_msg"
+          placeholder="اكتب استفسارك هنا..."
+          onkeypress="handleChatEnter(event)"
+        />
+        <button type="button" onclick="sendChatMessage()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <div id="pdfReport">
+      <div style="text-align: center; margin-bottom: 40px">
+        <h1
+          style="
+            color: #00b4d8;
+            font-family: sans-serif;
+            font-size: 3rem;
+            margin-bottom: 10px;
+          "
+        >
+          WATTO Platform
+        </h1>
+        <h2
+          style="color: #0f172a; font-family: sans-serif; font-weight: normal"
+        >
+          Official Energy Audit Report
+        </h2>
+      </div>
+      <hr style="margin-bottom: 40px; border: 1px solid #cbd5e1" />
+      <div
+        style="
+          font-size: 1.6rem;
+          line-height: 2.5;
+          font-family: sans-serif;
+          color: #1e293b;
+        "
+      >
+        <div
+          style="
+            background: #f8fafc;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 8px solid #00b4d8;
+            margin-bottom: 20px;
+          "
+        >
+          <strong>Total Estimated Consumption:</strong>
+          <span id="pdfKwh" style="color: #ff1744; font-weight: bold">0</span>
+          kWh
+        </div>
+        <div
+          style="
+            background: #f8fafc;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 8px solid #ffea00;
+            margin-bottom: 20px;
+          "
+        >
+          <strong>Total Estimated Bill:</strong>
+          <span id="pdfBill" style="color: #ff1744; font-weight: bold">0</span>
+          EGP
+        </div>
+        <div style="margin-top: 40px; padding: 20px">
+          <p>
+            <strong>Date of Report Generation:</strong>
+            
+          </p>
+          <p>
+            <strong>System Audit Status:</strong>
+            <span style="color: #00e676; font-weight: bold"
+              >Verified & Accurate ✓</span
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+
+    
+  <script src="js/script.js"></script>
+</body>
+</html>
